@@ -104,6 +104,50 @@ class Bird:
         return pygame.mask.from_surface(self.img)
 
 
+class Pipe:
+    """Class representing pipe(s)"""
+
+    GAP = 200
+    VEL = 5
+
+    def __init__(self, x):
+
+        # position along the x-axis
+        # the height determines the random position of the pipes
+        self.x = x
+        self.height = 0
+
+        # top is y coordinate of the top pipe
+        # bottom is the y coordinate of the bottom pipe
+        self.top = 0
+        self.bottom = 0
+
+        # Inverted top pipe image and bottom pipe image
+        self.PIPE_TOP = pygame.transform.flip(PIPE_IMG, False, True)
+        self.PIPE_BOTTOM = PIPE_IMG
+
+        # relevant for AI
+        self.passed = False
+        self.set_height()
+
+    def set_height(self):
+        # Set the random height and calculate top and bottom based on it
+        self.height = random.randrange(50, 450)
+        self.top = self.height - self.PIPE_TOP.get_height()
+        self.bottom = self.height + self.GAP
+
+    def move(self):
+        # move the pipes every frame
+        self.x -= self.VEL
+
+    def draw(self, win):
+        # draw the pipes on the screen every frame based on fresh coordinates
+        win.blit(self.PIPE_TOP, (self.x, self.top))
+        win.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
+
+    # def collide(self, bird, win):
+
+
 def draw_window(win, bird):
     """Draws the the bg image and bird on the window"""
     win.blit(BG_IMG, (0, 0))
