@@ -242,22 +242,28 @@ def main():
             if pipe.collide(bird):
                 pass
 
+            # adding pipe to removal list if it is out of the screen
             if pipe.x + pipe.PIPE_TOP.get_width() < 0:
                 rem.append(pipe)
 
+            # setting variables for adding a new pipe
+            # when the bird has already passed the pipe
             if not pipe.passed and pipe.x < bird.x:
                 pipe.passed = True
                 add_pipe = True
 
             pipe.move()
 
+        # actually adding a new pipe
         if add_pipe:
             score += 1
             pipes.append(Pipe(700))
 
+        # removing passed pipes
         for r in rem:
             pipes.remove(r)
 
+        # handling falling of the bird
         if bird.y + bird.img.get_height() >= 730:
             pass
 
