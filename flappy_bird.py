@@ -170,6 +170,38 @@ class Pipe:
         return False
 
 
+class Base:
+    """Class for Base"""
+
+    # Setting the velocity of the Base movement
+    VEL = 5
+    WIDTH = BASE_IMG.get_width()
+    IMG = BASE_IMG
+
+    def __init__(self, y):
+        self.y = y
+        self.x1 = 0
+        self.x2 = self.WIDTH
+
+    def move(self):
+        # move both bases with same vel
+        self.x1 -= self.VEL
+        self.x2 -= self.VEL
+
+        # add the other image back just behind the
+        # current image of base the moment it is completely
+        # out of the window
+        if self.x1 + self.WIDTH < 0:
+            self.x1 = self.x2 + self.WIDTH
+
+        if self.x2 + self.WIDTH < 0:
+            self.x2 = self.x1 + self.WIDTH
+
+    def draw(self, win):
+        win.blit(self.IMG, (self.x1, self.y))
+        win.blit(self.IMG, (self.x2, self.y))
+
+
 def draw_window(win, bird):
     """Draws the the bg image and bird on the window"""
     win.blit(BG_IMG, (0, 0))
