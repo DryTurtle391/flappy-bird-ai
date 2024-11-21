@@ -220,8 +220,18 @@ def draw_window(win, bird, pipes, base, score):
     pygame.display.update()
 
 
-def main():
-    bird = Bird(230, 350)  # initialising the bird
+def main(genomes, config):
+    nets = []
+    ge = []
+    birds = []  # Bird(230, 350)  # initialising the bird
+
+    for g in genomes:
+        net = neat.nn.FeedForwardNetwork(g, config)
+        nets.append(net)
+        birds.append(Bird(230, 350))
+        g.fitness = 0
+        ge.append(g)
+
     base = Base(730)  # initialising the base
     pipes = [Pipe(700)]  # initialising the pipe(s)
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))  # creating the window
@@ -239,24 +249,31 @@ def main():
         add_pipe = False  # var controlling spawning of new pipes
         rem = []  # pipe list to remove
         for pipe in pipes:
-            if pipe.collide(bird):
-                pass
+            for x, bird in enumerate(birds):
+
+                if pipe.collide(bird):
+                    ge[x].fitness -= 1  # punishing genomes which hit a pipe
+                    birds.pop(x)
+                    nets.pop(x)
+                    ge.pop(x)
+
+                # setting variables for adding a new pipe
+                # when the bird has already passed the pipe
+                if not pipe.passed and pipe.x < bird.x:
+                    pipe.passed = True
+                    add_pipe = True
 
             # adding pipe to removal list if it is out of the screen
             if pipe.x + pipe.PIPE_TOP.get_width() < 0:
                 rem.append(pipe)
-
-            # setting variables for adding a new pipe
-            # when the bird has already passed the pipe
-            if not pipe.passed and pipe.x < bird.x:
-                pipe.passed = True
-                add_pipe = True
 
             pipe.move()
 
         # actually adding a new pipe
         if add_pipe:
             score += 1
+            for g in ge:
+                g.fitness += 5  # rewarding genomes which pass through a pipe
             pipes.append(Pipe(700))
 
         # removing passed pipes
@@ -264,8 +281,11 @@ def main():
             pipes.remove(r)
 
         # handling falling of the bird
-        if bird.y + bird.img.get_height() >= 730:
-            pass
+        for x, bird in enumerate(birds):
+            if bird.y + bird.img.get_height() >= 730:
+                birds.pop(x)
+                nets.pop(x)
+                ge.pop(x)
 
         base.move()
         draw_window(win, bird, pipes, base, score)
@@ -274,3 +294,27 @@ def main():
 
 
 main()
+
+
+def run(config_file):
+    config = neat.config.Config(
+        neat.DefaultGenome,
+        neat.DefaultReproduction,
+        neat.DefaultSpeciesSet,
+        neat.DefaultStagnation,
+        config_file,
+    )
+
+    p = neat.Population(config)
+
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
+
+    winner = p.run(main, 50)
+
+
+if __name__ == "__main__":
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config-feedforward.txt")
+    run(config_path)
