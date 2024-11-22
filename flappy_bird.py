@@ -325,6 +325,9 @@ def main(genomes, config):
                 nets.pop(x)
                 ge.pop(x)
 
+        if score > 10:
+            break
+
         base.move()
         draw_window(
             win,
@@ -353,6 +356,8 @@ def run(config_file):
     p.add_reporter(stats)
 
     winner = p.run(main, 50)
+    print("WINNER: " + str(winner))
+    main([(1, winner)], config)
 
 
 if __name__ == "__main__":
