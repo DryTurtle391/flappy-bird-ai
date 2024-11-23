@@ -325,7 +325,7 @@ def main(genomes, config):
                 nets.pop(x)
                 ge.pop(x)
 
-        if score > 10:
+        if len(genomes) > 1 and score > 20:
             break
 
         base.move()
